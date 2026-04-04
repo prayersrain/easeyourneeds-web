@@ -27,11 +27,13 @@ export default function CustomerDashboardContent({
   userName,
   balance,
   upcomingCount = 0,
+  completedCount = 0,
   loyaltyPoints = 0,
 }: {
   userName: string;
   balance: string;
   upcomingCount?: number;
+  completedCount?: number;
   loyaltyPoints?: number;
 }) {
   const stats: Stat[] = [
@@ -50,6 +52,15 @@ export default function CustomerDashboardContent({
       icon: CalendarDays,
       color: "text-indigo-500",
       bg: "bg-indigo-500/10",
+      href: "/bookings",
+      action: "View All"
+    },
+    {
+      label: "Completed Bookings",
+      value: `${completedCount} Events`,
+      icon: Clock,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
       href: "/bookings",
       action: "View All"
     },

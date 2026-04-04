@@ -26,18 +26,13 @@ export default async function DashboardPage() {
 
   // Fetch real stats for customer dashboard
   const userId = session.user.id;
-  const statsResult = await pool.query(
-    `SELECT 
-       COUNT(*) FILTER (WHERE status = 'upcoming') as upcoming,
-       COUNT(*) FILTER (WHERE status = 'completed') as completed,
-       COALESCE(SUM(balance_available), 0) as balance
-     FROM users
-     WHERE id = $1`,
+
+  // Get user balance
+  const balanceResult = await pool.query(
+    `SELECT COALESCE(balance_available, 0) as balance FROM users WHERE id = $1`,
     [userId]
   );
-
-  const userStats = statsResult.rows[0];
-  const userBalance = userStats?.balance || session.user.balance || 0;
+  const userBalance = balanceResult.rows[0]?.balance || session.user.balance || 0;
 
   // Formatting balance for display
   const formattedBalance = new Intl.NumberFormat("id-ID", {
@@ -53,6 +48,13 @@ export default async function DashboardPage() {
   );
   const upcomingCount = upcomingResult.rows[0]?.count || 0;
 
+  // Fetch completed bookings count
+  const completedResult = await pool.query(
+    `SELECT COUNT(*) as count FROM bookings WHERE user_id = $1 AND status = 'completed'`,
+    [userId]
+  );
+  const completedCount = completedResult.rows[0]?.count || 0;
+
   // Fetch loyalty points
   const pointsResult = await pool.query(
     `SELECT COALESCE(balance, 0) as points FROM loyalty_points WHERE user_id = $1`,
@@ -65,6 +67,7 @@ export default async function DashboardPage() {
       userName={session.user.name || "Customer"}
       balance={formattedBalance}
       upcomingCount={upcomingCount}
+      completedCount={completedCount}
       loyaltyPoints={loyaltyPoints}
     />
   );
